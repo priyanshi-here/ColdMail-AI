@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, CheckSquare, Sparkles } from 'lucide-react';
+import { ShieldCheck, CheckSquare } from 'lucide-react';
 
 export default function PersonalizationBadge({ personalization }) {
   if (!personalization) return null;

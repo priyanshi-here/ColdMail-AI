@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Sparkles, Send } from 'lucide-react';
+import { Sparkles, Send } from 'lucide-react';
 import { getSampleJob } from '../services/api';
 
 export default function StepJobDesc({ jobDescription, setJobDescription, onAnalyze, loading, onToast }) {

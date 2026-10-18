@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, Zap, Sparkles, AlertCircle } from 'lucide-react';
+import { Send, Sparkles, AlertCircle } from 'lucide-react';
 
 export default function Header({ apiStatus }) {
   const isOnline = apiStatus?.status === 'healthy';
@@ -29,7 +29,7 @@ export default function Header({ apiStatus }) {
           isGeminiConfigured ? (
             <div className="status-badge" title="Gemini AI Powered Generation Ready">
               <Sparkles size={14} />
-              <span>Gemini 2.5 Active</span>
+              <span>Gemini 3.8 Active</span>
             </div>
           ) : (
             <div className="status-badge warning" title="No Gemini API Key set in backend .env. Operating in intelligent evidence-based mode.">

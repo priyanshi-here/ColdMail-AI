@@ -89,7 +89,7 @@ class AnalysisResponse(BaseModel):
 
 class RegenerateRequest(BaseModel):
     job_description: str
-    candidate_profile: CandidateProfile
+    candidate_profile: Optional[CandidateProfile] = None
     tone: str = "Professional"
     length: str = "Medium"
     outreach_type: Optional[str] = None  # "recruiter", "hiring_manager", "employee", "linkedin", or None for all

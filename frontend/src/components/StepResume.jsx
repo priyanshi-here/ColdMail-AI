@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, CheckCircle, RefreshCw, Sparkles, User, Briefcase, Award, ExternalLink, Code } from 'lucide-react';
+import { Upload, CheckCircle, RefreshCw, Sparkles, User, Briefcase, ExternalLink, Code } from 'lucide-react';
 import { uploadResumePdf, getSampleResume } from '../services/api';
 
 export default function StepResume({ candidateProfile, setCandidateProfile, onToast }) {

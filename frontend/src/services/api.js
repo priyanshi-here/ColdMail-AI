@@ -4,7 +4,7 @@ export async function checkHealth() {
   try {
     const res = await fetch(`${API_BASE}/health`);
     return await res.json();
-  } catch (err) {
+  } catch {
     return { status: "offline", gemini_api_configured: false };
   }
 }

@@ -103,10 +103,12 @@ def regenerate_outreach(request: RegenerateRequest):
     if not request.job_description or not request.job_description.strip():
         raise HTTPException(status_code=400, detail="Job description text cannot be empty.")
 
+    candidate = request.candidate_profile or SAMPLE_CANDIDATE_PROFILE
+
     try:
         response = gemini_service.analyze_and_generate(
             job_description=request.job_description.strip(),
-            candidate_profile=request.candidate_profile,
+            candidate_profile=candidate,
             tone=request.tone,
             length=request.length
         )

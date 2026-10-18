@@ -45,25 +45,32 @@ class GeminiService:
         if not self.client:
             return None
 
-        try:
-            if self.sdk_type == "google-genai":
-                response = self.client.models.generate_content(
-                    model='gemini-2.5-flash',
-                    contents=prompt,
-                    config={
-                        'response_mime_type': 'application/json'
-                    }
-                )
-                return response.text
-            elif self.sdk_type == "google-generativeai":
-                response = self.client.generate_content(
-                    prompt,
-                    generation_config={"response_mime_type": "application/json"}
-                )
-                return response.text
-        except Exception as e:
-            logger.error(f"Error calling Gemini API: {str(e)}")
-            return None
+        # Candidate models to try in preference order
+        models_to_try = ['gemini-3.8-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+
+        for model_name in models_to_try:
+            try:
+                if self.sdk_type == "google-genai":
+                    response = self.client.models.generate_content(
+                        model=model_name,
+                        contents=prompt,
+                        config={
+                            'response_mime_type': 'application/json'
+                        }
+                    )
+                    if response and response.text:
+                        return response.text
+                elif self.sdk_type == "google-generativeai":
+                    response = self.client.generate_content(
+                        prompt,
+                        generation_config={"response_mime_type": "application/json"}
+                    )
+                    if response and response.text:
+                        return response.text
+            except Exception as e:
+                logger.warning(f"Error calling Gemini model '{model_name}': {str(e)}")
+                continue
+
         return None
 
     def parse_resume_text(self, resume_text: str) -> CandidateProfile:
@@ -117,6 +124,15 @@ class GeminiService:
             try:
                 data = self._clean_and_parse_json(raw_json)
                 data["raw_text"] = resume_text
+                # Sanitize list fields if model returned comma-separated strings
+                for list_field in [
+                    "technical_skills", "programming_languages", "frameworks",
+                    "databases", "tools", "certifications", "achievements", "relevant_links"
+                ]:
+                    if isinstance(data.get(list_field), str):
+                        data[list_field] = [s.strip() for s in data[list_field].split(",") if s.strip()]
+                    elif not isinstance(data.get(list_field), list):
+                        data[list_field] = []
                 return CandidateProfile(**data)
             except Exception as e:
                 logger.error(f"Failed to parse Gemini resume response: {e}")
@@ -139,9 +155,18 @@ class GeminiService:
             if raw_json:
                 try:
                     data = self._clean_and_parse_json(raw_json)
+                    # Sanitize match score safely into int 0-100
+                    cand_match = data.get("candidate_match", {})
+                    if "match_score" in cand_match:
+                        try:
+                            clean_score = str(cand_match["match_score"]).replace("%", "").strip()
+                            cand_match["match_score"] = max(0, min(100, int(round(float(clean_score)))))
+                        except Exception:
+                            cand_match["match_score"] = 75
+
                     response = AnalysisResponse(
                         job_analysis=JobAnalysis(**data.get("job_analysis", {})),
-                        candidate_match=MatchAnalysis(**data.get("candidate_match", {})),
+                        candidate_match=MatchAnalysis(**cand_match),
                         personalization=PersonalizationLayer(**data.get("personalization", {})),
                         emails=OutreachEmails(**data.get("emails", {})),
                         linkedin=OutreachLinkedIn(**data.get("linkedin", {})),
@@ -236,9 +261,13 @@ class GeminiService:
         """
 
     def _clean_and_parse_json(self, raw_text: str) -> Dict[str, Any]:
-        """Cleans code fences and parses JSON string."""
+        """Cleans code fences, extracts valid JSON block, and parses JSON string."""
         cleaned = re.sub(r'```(?:json)?\s*', '', raw_text)
         cleaned = re.sub(r'\s*```', '', cleaned).strip()
+        start_idx = cleaned.find('{')
+        end_idx = cleaned.rfind('}')
+        if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
+            cleaned = cleaned[start_idx:end_idx + 1]
         return json.loads(cleaned)
 
     def _heuristic_parse_resume(self, text: str) -> CandidateProfile:
