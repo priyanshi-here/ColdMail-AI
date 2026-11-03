@@ -127,11 +127,11 @@ Add your screenshots to a `docs/screenshots` folder and reference them here:
  
 | Upload and analyze | Match analysis |
 | --- | --- |
-| ![Upload](docs/screenshots/upload.png) | ![Match](docs/screenshots/match.png) |
+| ![Upload](ColdMail-AI/blob/main/Screenshot%202026-10-18%20234933.png) | ![Match](docs/screenshots/match.png) |
  
 | Outreach kit |
 | --- |
-| ![Outreach](docs/screenshots/outreach.png) |
+| ![Outreach](docs/Screenshot 2026-10-18 235048.png) |
  
 ## Project structure
  
